@@ -38,9 +38,6 @@ parser = WebhookParser(channel_secret)
 news_api_key = os.getenv('NEWS_API_KEY')
 gmini_api_key = os.getenv('GMINI_API_KEY')
 
-# Initialize the Gemini Pro API
-#gmini.configure(api_key=GEMINI_API_KEY)
-
 @app.get("/health")
 async def health():
     return 'ok'
@@ -52,13 +49,18 @@ async def process_user_message(message, user_id):
     處理用戶發送的消息並返回相應的回應。
     """
     if "新聞" in message:
+        # 從用戶消息中提取關鍵字
+        keyword = message.replace("新聞", "").strip()
+        if not keyword:
+            return "請提供一個新聞關鍵字，例如「性別歧視新聞」。"
+        
         # 呼叫 fetch_news_data 函數來獲取新聞
-        news_response = fetch_news_data("gender equality OR emotional education", news_api_key)
+        news_response = fetch_news_data(keyword, news_api_key)
         if news_response and news_response.get("status") == "ok":
             articles = news_response.get("articles", [])
             if articles:
                 random_article = random.choice(articles)
-                return f"最新新聞：\n\n標題: {top_article['title']}\n\n描述: {top_article['description']}\n\n更多詳情: {top_article['url']}"
+                return f"最新新聞：\n\n標題: {random_article['title']}\n\n描述: {random_article['description']}\n\n更多詳情: {random_article['url']}"
         return "目前沒有相關新聞。"
     elif "故事" in message:
         # 呼叫 generate_gmini_story 函數來生成故事
