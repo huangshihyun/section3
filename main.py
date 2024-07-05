@@ -49,10 +49,9 @@ async def process_user_message(message, user_id):
     處理用戶發送的消息並返回相應的回應。
     """
     if "新聞" in message:
-        # 從用戶消息中提取關鍵字
         keyword = message.replace("新聞", "").strip()
         if not keyword:
-            return "請提供一個新聞關鍵字，例如「性別歧視新聞」。"
+            keyword = "最新新聞"
         
         # 呼叫 fetch_news_data 函數來獲取新聞
         news_response = fetch_news_data(keyword, news_api_key)
