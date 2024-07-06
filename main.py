@@ -44,18 +44,10 @@ async def health():
 
 import random
 
-# 用于存储用户上下文状态的字典
-user_states = {}
-
 async def process_user_message(message, user_id):
     """
     處理用戶發送的消息並返回相應的回應。
     """
-    if user_id not in user_states:
-        user_states[user_id] = {}
-
-    user_state = user_states[user_id]
-
     if "新聞" in message:
         keyword = message.replace("新聞", "").strip()
         if not keyword:
@@ -67,17 +59,11 @@ async def process_user_message(message, user_id):
             articles = news_response.get("articles", [])
             if articles:
                 random_article = random.choice(articles)
-                return f"標題: {random_article['title']}\n\n描述: {random_article['description']}\n\n更多詳情: {random_article['url']}"
+                return f"最新新聞：\n\n標題: {random_article['title']}\n\n描述: {random_article['description']}\n\n更多詳情: {random_article['url']}"
         return "目前沒有相關新聞。"
     elif "故事" in message:
-        user_state['awaiting_story_theme'] = True
-        return "你想編什麼主題的故事？請告訴我主題。"
-    elif user_state.get('awaiting_story_theme'):
-        user_state['awaiting_story_theme'] = False
-        keyword = message.strip()
-        
         # 呼叫 generate_gmini_story 函數來生成故事
-        story_response = generate_gmini_story(f"開始你的故事: {keyword}...", user_id, gmini_api_key)
+        story_response = generate_gmini_story("開始你的故事...", user_id, gmini_api_key)
         if story_response:
             return story_response.get("story", "無法生成故事。")
         return "生成故事時出現錯誤。"
