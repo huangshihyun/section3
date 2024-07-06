@@ -38,9 +38,6 @@ parser = WebhookParser(channel_secret)
 news_api_key = os.getenv('NEWS_API_KEY')
 gmini_api_key = os.getenv('GMINI_API_KEY')
 
-# Initialize the Gemini Pro API
-#gmini.configure(api_key=GEMINI_API_KEY)
-
 @app.get("/health")
 async def health():
     return 'ok'
@@ -66,8 +63,13 @@ async def process_user_message(message, user_id):
                 return f"最新新聞：\n\n標題: {random_article['title']}\n\n描述: {random_article['description']}\n\n更多詳情: {random_article['url']}"
         return "目前沒有相關新聞。"
     elif "故事" in message:
-        # 呼叫 generate_gmini_story 函數來生成故事
-        story_response = generate_gmini_story("開始你的故事...", user_id, gmini_api_key)
+        # Extract keyword from the message
+        keyword = message.replace("故事", "").strip()
+        if not keyword:
+            return "請提供要編寫故事的關鍵字，例如「性別平等故事」或「朋友故事」。"
+
+        # Fetch story from Gemini API based on the keyword
+        story_response = generate_gmini_story(keyword, user_id, gmini_api_key)
         if story_response:
             return story_response.get("story", "無法生成故事。")
         return "生成故事時出現錯誤。"
