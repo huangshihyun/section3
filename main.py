@@ -49,12 +49,12 @@ async def process_user_message(message, user_id):
     處理用戶發送的消息並返回相應的回應。
     """
     if "新聞" in message:
-        # Extract keyword from the message
+        # 提取消息中的关键字
         keyword = message.replace("新聞", "").strip()
         if not keyword:
             return "請提供要查詢的新聞關鍵字，例如「性別平等新聞」或「台積電新聞」。"
         
-        # Fetch news data based on the keyword
+        # 根据关键字获取新闻数据
         news_response = fetch_news_data(keyword, news_api_key)
         if news_response and news_response.get("status") == "ok":
             articles = news_response.get("articles", [])
@@ -63,12 +63,12 @@ async def process_user_message(message, user_id):
                 return f"最新新聞：\n\n標題: {random_article['title']}\n\n描述: {random_article['description']}\n\n更多詳情: {random_article['url']}"
         return "目前沒有相關新聞。"
     elif "故事" in message:
-        # Extract keyword from the message
+        # 提取消息中的关键字
         keyword = message.replace("故事", "").strip()
         if not keyword:
             return "請提供要編寫故事的關鍵字，例如「性別平等故事」或「朋友故事」。"
 
-        # Fetch story from Gemini API based on the keyword
+        # 根据关键字从Gemini API获取故事
         logger.info(f"Fetching story for keyword: {keyword}")
         story_response = generate_gmini_story(keyword, user_id, gmini_api_key)
         if story_response:
@@ -95,7 +95,7 @@ async def handle_callback(request: Request):
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     for event in events:
-        logging.info(f"Received event: {event}")
+        logger.info(f"Received event: {event}")
         if not isinstance(event, MessageEvent):
             continue
         if not isinstance(event.message, TextMessageContent):
@@ -105,6 +105,7 @@ async def handle_callback(request: Request):
         user_id = event.source.user_id
 
         reply_message = await process_user_message(text, user_id)
+        logger.info(f"Reply message: {reply_message}")
         await line_bot_api.reply_message(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
