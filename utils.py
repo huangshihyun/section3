@@ -5,13 +5,17 @@ def fetch_news_data(query, api_key):
     response = requests.get(url)
     return response.json()
 
-def generate_gmini_story(prompt, user_id, api_key):
-    url = "https://api.gmini.ai/generate"
-    payload = {"prompt": prompt, "user_id": user_id, "api_key": api_key}
-    try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()  # 如果響應狀態碼不是 200，則引發 HTTPError
+import requests
+
+def generate_gmini_story(prompt, user_id, gmini_api_key):
+    url = "https://api.gemini.example.com/v1/generate_story"
+    headers = {"Authorization": f"Bearer {gmini_api_key}"}
+    payload = {"prompt": prompt, "user_id": user_id}
+    
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
         return response.json()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to generate story: {e}")
-        return {"error": "無法生成故事。"}
+    else:
+        return None
+
