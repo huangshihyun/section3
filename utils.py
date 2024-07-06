@@ -6,14 +6,13 @@ def fetch_news_data(query, api_key):
     response = requests.get(url)
     return response.json()
 
-
 import requests
 import logging
 
 logger = logging.getLogger(__file__)
 
 def generate_gmini_story(prompt, user_id, gmini_api_key):
-    url = "https://api.gemini.example.com/v1/generate_story"
+    url = "https://api.gemini.example.com/v1/generate_story"  # 确保这是正确的URL
     headers = {"Authorization": f"Bearer {gmini_api_key}"}
     payload = {"prompt": prompt, "user_id": user_id}
 
@@ -21,6 +20,7 @@ def generate_gmini_story(prompt, user_id, gmini_api_key):
     try:
         response = requests.post(url, headers=headers, json=payload)
         logger.info(f"Gemini API response status: {response.status_code}")
+        logger.info(f"Gemini API response body: {response.text}")
         if response.status_code == 200:
             logger.info(f"Gemini API response: {response.json()}")
             return response.json()
@@ -30,4 +30,5 @@ def generate_gmini_story(prompt, user_id, gmini_api_key):
     except Exception as e:
         logger.error(f"Exception when calling Gemini API: {str(e)}")
         return None
+
 
