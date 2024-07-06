@@ -1,5 +1,4 @@
 import requests
-import logging
 
 def fetch_news_data(query, api_key):
     url = f"https://newsapi.org/v2/everything?q={query}&apiKey={api_key}"
@@ -7,7 +6,8 @@ def fetch_news_data(query, api_key):
     return response.json()
 
 
-
+import requests
+import logging
 def generate_gmini_story(prompt, user_id, gmini_api_key):
     url = "https://api.gemini.example.com/v1/generate_story"
     headers = {"Authorization": f"Bearer {gmini_api_key}"}
