@@ -19,7 +19,7 @@ if os.getenv('API_ENV') != 'production':
     from dotenv import load_dotenv
     load_dotenv()
 
-logging.basicConfig(level=os.getenv('LOG', 'WARNING'))
+logging.basicConfig(level=os.getenv('LOG', 'INFO'))
 logger = logging.getLogger(__file__)
 
 app = FastAPI()
@@ -27,7 +27,7 @@ app = FastAPI()
 channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
 channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
 if channel_secret is None or channel_access_token is None:
-    print('Specify LINE_CHANNEL_SECRET and LINE_CHANNEL_ACCESS_TOKEN as environment variables.')
+    logger.error('Specify LINE_CHANNEL_SECRET and LINE_CHANNEL_ACCESS_TOKEN as environment variables.')
     sys.exit(1)
 
 configuration = Configuration(access_token=channel_access_token)
@@ -69,9 +69,12 @@ async def process_user_message(message, user_id):
             return "請提供要編寫故事的關鍵字，例如「性別平等故事」或「朋友故事」。"
 
         # Fetch story from Gemini API based on the keyword
+        logger.info(f"Fetching story for keyword: {keyword}")
         story_response = generate_gmini_story(keyword, user_id, gmini_api_key)
         if story_response:
+            logger.info(f"Story generated: {story_response}")
             return story_response.get("story", "無法生成故事。")
+        logger.error("Failed to generate story.")
         return "生成故事時出現錯誤。"
     else:
         return "請問你想了解什麼？可以說「新聞」或「故事」。"
@@ -88,10 +91,11 @@ async def handle_callback(request: Request):
     try:
         events = parser.parse(body, signature)
     except InvalidSignatureError:
+        logger.error("Invalid signature")
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     for event in events:
-        logging.info(event)
+        logging.info(f"Received event: {event}")
         if not isinstance(event, MessageEvent):
             continue
         if not isinstance(event.message, TextMessageContent):
@@ -114,5 +118,5 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get('PORT', default=8080))
     debug = os.environ.get('API_ENV', default='develop') == 'develop'
-    logging.info('Application will start...')
+    logger.info('Application will start...')
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=debug)
